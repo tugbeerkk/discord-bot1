@@ -1,0 +1,69 @@
+import discord
+from discord.ext import commands
+from config import token
+import random
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.attachments = True
+
+client = commands.Bot(command_prefix='.', intents=intents)
+
+class Car:
+    def __init__(self, colour, brand):
+        self.colour = colour
+        self.brand = brand
+    
+    def info(self):
+        return f"Bu araba {self.colour} renkli ve {self.brand} markadır."
+
+@client.event
+async def on_ready():
+    print(f'Giriş yaptı:  {client.user}')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.attachments:
+        await message.channel.send("Bir resim gönderdiniz!")
+    
+    if message.content.startswith(client.command_prefix):
+        await client.process_commands(message)
+    else:
+        await message.channel.send(message.content)
+
+@client.command()
+async def yt(ctx, amount: str):
+    sayi = random.randint(1, 2)
+    amount = int(amount)
+    if sayi == 1:
+        amount += amount
+        await ctx.send(f"Parayı ikiye katladın ama db yok, sansına küs. Mevcut bakiyen: {amount}")
+    if sayi == 2:
+        amount -= amount
+        await ctx.send(f"Parayı kaybettin, ağla. Mevcut bakiyen: {amount}")
+
+@client.command()
+async def about(ctx):
+    await ctx.send('Bu discord.py kütüphanesi ile oluşturulmuş echo-bot!')
+
+@client.command()
+async def info(ctx):
+    await ctx.send('Ben basit bir Discord botuyum! Komutlarımı görmek için .help yazabilirsin.')
+
+@client.command()
+async def add(ctx, a: int, b: int):
+    await ctx.send(f"Sonuç: {a + b}")
+
+@client.command()
+async def joined(ctx, member: discord.Member):
+    await ctx.send(f"{member.name}, {member.joined_at.strftime('%Y-%m-%d %H:%M:%S')} tarihinde sunucuya katıldı.")
+
+@client.command()
+async def car(ctx, colour: str, brand: str):
+    car_instance = Car(colour, brand)
+    await ctx.send(car_instance.info())
+
+client.run(token)
